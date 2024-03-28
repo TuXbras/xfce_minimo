@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Por Gustavo Valério
+# www.gustavovalerio.com
+# @gvs90
+
+echo "Seus repositórios serão configurados..."
+echo "Fazendo backup do Sources.list"
+mv /etc/apt/sources.list{,.bkp}
+echo "Obtendo novo sources.list..."
+cd /etc/apt/
+wget http://www.gustavovalerio.xpg.com.br/linux/sources.list
+echo "Sources.list novo instalado, atualizando ..."
+apt update;apt upgrade -y
+
+echo "Instalando o X e drivers de áudio e vídeo"
+apt install xorg xinit mesa-utils pulseaudio{,-utils} alsa-{utils,base} -y
+
+echo "Instalando XFCE e alguns programas básicos..."
+apt install --no-install-recommends xfce4-{session,settings,panel,pulseaudio-plugin,whiskermenu-plugin,terminal,taskmanager,screenshooter} dbus-x11 desktop-file-utils gtk{2,3}-engines-xfce hicolor-icon-theme thunar xfdesktop4 xfwm4 fonts-cantarell mousepad vlc audacious tumbler gksu synaptic viewnior file-roller thunar-archive-plugin pavucontrol policykit-1{,-gnome} menu{,libre,-l10n} -y
+
+echo "Instalando um gerenciador de login"
+apt install --no-install-recommends lxdm -y
+
+echo "instalando um kernel de baixa latência e o Prelink"
+apt install linux-lowlatency prelink -y
+
+echo "Instalando um firewall"
+apt install gufw python-gobject python-ufw -y
+echo "Habilitando o firewall"
+ufw enable
+
+echo "Prelinkando o sistema"
+sed -i 's/unknown/yes/g' /etc/default/prelink
+prelink -amvR
+
+echo "Diminuindo a prioridade Swap e melhorando o Uso do cache"
+echo "vm.swappiness=10">>/etc/sysctl.conf
+echo "vm.vfs_cache_pressure=100">>/etc/sysctl.conf
+sysctl -p
+echo "Configurações concluídas!"
+echo "Reiniciando..."
+sleep 3
+reboot
